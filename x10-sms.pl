@@ -21,19 +21,28 @@ $errormsg = "";
 %devices = ( 	'U' => 'A1',
 		'D' => 'A2',
 		'K' => 'A3',
-		'C' => 'A4'	);
+		'T' => 'A4'	);
+%circuits = (  	'U' => 'Upstairs',
+		'D' => 'Downstairs',
+		'K' => 'Kitchen',
+		'T' => 'Tank' );
+ 
 
+open(FILE, "./lastnumber");
+my @lines =<FILE>;
+$phonenum = @lines[0];
 if (@elements % 2)	{
-	if (@elements[0] == '?')	{
+	if (@elements[0] eq '?')	{
 		# do a status SMS
+		print 'status';
 	} else	{
-		$cmd = "echo \"Not a clue, mate...\" | gnokii --sendsms 0877996336";
+		$cmd = "echo \"Not a valid command\" | gnokii --sendsms $phonenum";
 		$result = system($cmd);
 	}
 } else	{
 	for($i=0;$i<@elements;$i+=2)	{
 		# validate commands
-		if (index('UDKC',uc @elements[$i])!=-1)	{
+		if (index('UDKT',uc @elements[$i])!=-1)	{
 			if (index('ONOFF',uc @elements[$i+1])!=-1)	{
 				$commands{uc @elements[$i]}=uc @elements[$i+1];
 			}	else	{
@@ -47,13 +56,16 @@ if (@elements % 2)	{
 	}
 	if ($InvalidSection == 0 && $InvalidCommand == 0)	{
 		# process commands
+		$reply = "";
 		while (($circuit, $command) = each %commands ) {
-        		$cmd = 'heyu '.$command.' '.$devices{$circuit};
+        		$cmd = 'heyu '.lc $command.' '.$devices{$circuit};
+			$reply .= $circuits{$circuit}.' switched '.$command."\n";
 			$result = system($cmd);
 		}
-		# generate SMS reply
+		$cmd = "echo \"$reply\" | gnokii --sendsms $phonenum";
+		$result = system($cmd);
 	} else	{
-		$cmd = "echo \"$errormsg\n" | gnokii --sendsms 0877996336";
+		$cmd = "echo \"$errormsg\" | gnokii --sendsms $phonenum";
 		$result = system($cmd);
 	}
 }

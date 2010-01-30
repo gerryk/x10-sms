@@ -16,7 +16,10 @@
 # the system status.
 # So, let's first split out all the elements and count them...
 
-@elements = @ARGV;
+#@elements = @ARGV;
+$args =<STDIN>;
+chop $args;
+@elements = split(/ /,$args);
 $errormsg = "";
 %devices = ( 	'U' => 'A1',
 		'D' => 'A2',
@@ -36,14 +39,15 @@ if (@elements % 2)	{
 		# do a status SMS
 		print 'status';
 	} else	{
-		$cmd = "echo \"Not a valid command\" | gnokii --sendsms $phonenum";
+		$elements = join (" ",@elements);
+		$cmd = "echo \"'$elements' Not a valid command\" | gnokii --sendsms $phonenum";
 		$result = system($cmd);
 	}
 } else	{
 	for($i=0;$i<@elements;$i+=2)	{
 		# validate commands
 		if (index('UDKT',uc @elements[$i])!=-1)	{
-			if (index('ONOFF',uc @elements[$i+1])!=-1)	{
+			if (index('ON,OFF',uc @elements[$i+1])!=-1)	{
 				$commands{uc @elements[$i]}=uc @elements[$i+1];
 			}	else	{
 				$InvalidCommand = 1;

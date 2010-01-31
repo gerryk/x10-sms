@@ -1,3 +1,5 @@
 A tool to pull SMS messages from a USB GSM interface, parse them for command strings and either push the commands to the X10 interface or collect X10 relay status information and return a status SMS.
 
+So far, there is little validation of incoming SMS and no checking to see if the X10 commands have actually been accepted.
 
+Further enhancements would be to do an X10 search initially and check teh found devices against the configuration.
